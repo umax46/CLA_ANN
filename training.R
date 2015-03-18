@@ -1,13 +1,22 @@
+# Code for training the neural network. Implemented using a data frame
+#---------------------------------------------------------------------------------------
+# Author: Diego Gonzalez Rodriguez
+# Date: 18/03/2015
+# Contact: umax46@gmail.com
+#---------------------------------------------------------------------------------------
+# Algorithm
+#---------------------------------------------------------------------------------------
 #For each token in the spam message corpus do
-#If layer is already exist in Innate_Input_Layer then 
-#  Innate_Input_Layer.msg_matched->Innate_Input_Layer.msg_matched + 1 
-#  Innate_Input_Layer.spam_matched->Innate_Input_Layer.spam_matched + spam_increment 
-#else
+# If layer is already exist in Innate_Input_Layer then 
+#    Innate_Input_Layer.msg_matched->Innate_Input_Layer.msg_matched + 1 
+#    Innate_Input_Layer.spam_matched->Innate_Input_Layer.spam_matched + spam_increment 
+# else
 #  Add token to Innate_Input_Layer 
 #  Innate_Input_Layer.msg_matched->Innate_Input_Layer.msg_matched + 1 
 #  Innate_Input_Layer.spam_matched->Innate_Input_Layer.spam_matched + spam_increment 
-#end if
+# end if
 #end for
+#---------------------------------------------------------------------------------------
 library(stringr)
 
 # Set working directory
@@ -15,20 +24,12 @@ setwd("/Users/umax46/TECI/Redes\ Neuronales\ y\ aprendizaje\ estadistico/Practic
 
 # Create an empty innate_input_layer
 innate_input_layers <- data.frame(token=character(), weight=numeric(), msg_matched=numeric(), spam_matched=numeric(), stringsAsFactors=FALSE) 
+# Define the size of the neural network
 num_node = 1000;
 
 # Function to get tokens from a message
 gimmie_tokens_from_message <- function(fileName) {
-  #file <- readChar(fileName, file.info(fileName)$size)
-  #mail_tokens <- strsplit(file, " ")[[1]]
-  #file <- scan(fileName,what="");
-  #file <- file [grep("[a-z]", file)];
-  #mail_tokens <- strsplit(file, " ", fixed = TRUE);
-  print("NOMBRE DE FICHERO:");
-  print(fileName);
-  
-  
-  file <- scan(fileName, what=character(),sep="", fileEncoding="UTF-8-BOM");
+  file <- scan(fileName, what=character(), sep="", skip = 30, fileEncoding="UTF-8-BOM");
   htlm_start_elements <- str_match(file,"<\\w+>");
   htlm_end_elements <- str_match(file,"</\\w+>");
   file <- file [! file %in% htlm_start_elements];
@@ -44,11 +45,11 @@ exist_token <- function(mail_token) {
 }
 
 # Function to retrieve a valid index for new token
+# If table is full check for token with minimum weight
 gimmie_index <- function(min_weight) {
   current_index <- nrow(innate_input_layers);
   if (current_index >= num_node) {
     current_weight <- innate_input_layers$weight[which.min(innate_input_layers$weight)];
-    #print(current_weight);
     if ( current_weight >= min_weight) {
       return(0);
     } else {
@@ -59,49 +60,54 @@ gimmie_index <- function(min_weight) {
   }
 }
 
-# Set files from the training set
-training_set_directory <-"./training_set";
-#training_set_directory <-"./Prueba";
+# Set files from the training spam set
+training_set_directory <-"./training_spam_set";
 spam<-list.files(path = training_set_directory);
 
-spam_increment = 0.5;
+# Algorithm for spam training
+spam_increment = 1;
 for (i in 1:length(spam)) {
-  #print(spam[i]);
   fileName <- paste(training_set_directory, spam[i], sep="/");
   mail_tokens <- gimmie_tokens_from_message(fileName);
   mail_tokens <- mail_tokens [! mail_tokens %in% ""] #to evict "" in mail_tokens
   for (t in mail_tokens) {
-    t <- gsub("\\(", "", t); #to evict problems with '(text' without ')'
-    #print(t);
-    #print(class(t));
-    #print(any(grepl(t, innate_input_layers$token)));
     exist <- exist_token(toupper(t));
-    #print(exist);
    if (exist) {
-     #index <- which(apply(innate_input_layers, 2, function(x) any(grepl(t, innate_input_layers$token))))
-     #index <- index[1]
      index <- which(innate_input_layers$token == t)
-      #  Innate_Input_Layer.msg_matched->Innate_Input_Layer.msg_matched + 1 
-      #  Innate_Input_Layer.spam_matched->Innate_Input_Layer.spam_matched + spam_increment 
      if (length(index) == 1) {
-       #print(t);
-       #print(index);
-       #print(class(index))
-       #print(class(innate_input_layers$msg_matched));
-       #print(length(index));
+       innate_input_layers$msg_matched[index] <- as.numeric(innate_input_layers$msg_matched[index]) + 1;
+       innate_input_layers$spam_matched[index] <- as.numeric(innate_input_layers$spam_matched[index]) + spam_increment;
        new_weight <- as.numeric(innate_input_layers$spam_matched[index]) / (as.numeric(innate_input_layers$msg_matched[index]) + 1);
        innate_input_layers$weight[index] <- new_weight;
-       innate_input_layers$msg_matched[index] <- as.numeric(innate_input_layers$msg_matched[index]) + 1;
-       innate_input_layers$spam_matched[index] <- as.numeric(innate_input_layers$spam_matched[index]) + spam_increment; 
-       
      }
     } else {
       index <- gimmie_index(0.1);
-      #print(index);
       if (index != 0) {
-        innate_input_layers[index, ] <- c(toupper(t), 0.1, 1, spam_increment);        
+        innate_input_layers[index, ] <- c(toupper(t), 0.08, 1, spam_increment);        
       }
     }
   }
 }
 
+
+# Set files from the training ham set
+training_set_directory <-"./training_ham_set";
+ham<-list.files(path = training_set_directory);
+
+# Algorithm for ham training
+for (i in 1:length(ham)) {
+  fileName <- paste(training_set_directory, ham[i], sep="/");
+  mail_tokens <- gimmie_tokens_from_message(fileName);
+  mail_tokens <- mail_tokens [! mail_tokens %in% ""] #to evict "" in mail_tokens
+  for (t in mail_tokens) {
+    exist <- exist_token(toupper(t));
+    if (exist) {
+      index <- which(innate_input_layers$token == t)
+      if (length(index) == 1) {
+        innate_input_layers$msg_matched[index] <- as.numeric(innate_input_layers$msg_matched[index]) + 1;
+        new_weight <- as.numeric(innate_input_layers$spam_matched[index]) / (as.numeric(innate_input_layers$msg_matched[index]) + 1);
+        innate_input_layers$weight[index] <- new_weight;
+      }
+    }
+  }
+}
