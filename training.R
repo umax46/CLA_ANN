@@ -25,17 +25,19 @@ setwd("/Users/umax46/TECI/Redes\ Neuronales\ y\ aprendizaje\ estadistico/Practic
 # Create an empty innate_input_layer
 innate_input_layers <- data.frame(token=character(), weight=numeric(), msg_matched=numeric(), spam_matched=numeric(), stringsAsFactors=FALSE) 
 # Define the size of the neural network
-num_node = 1000;
+num_node = 100;
 
 # Function to get tokens from a message
 gimmie_tokens_from_message <- function(fileName) {
   file <- scan(fileName, what=character(), sep="", skip = 30, fileEncoding="UTF-8-BOM");
   htlm_start_elements <- str_match(file,"<\\w+>");
   htlm_end_elements <- str_match(file,"</\\w+>");
-  file <- file [! file %in% htlm_start_elements];
-  file <- file [! file %in% htlm_end_elements];
+  file <- file [! file %in% htlm_start_elements]; # to delete html elements
+  file <- file [! file %in% htlm_end_elements]; # to delete html elements
   mail_tokens <- str_match(file,"\\w+");
   mail_tokens <- na.omit(mail_tokens);
+  numbers <- regexpr("[^\\.0-9]",mail_tokens) == -1; 
+  mail_tokens <- mail_tokens [numbers == FALSE]; # to delete numeric values
   return(mail_tokens);
 }
 
