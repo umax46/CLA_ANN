@@ -24,8 +24,8 @@ setwd("/Users/umax46/TECI/Redes\ Neuronales\ y\ aprendizaje\ estadistico/Practic
 
 # Create an empty innate_input_layer
 innate_input_layers <- data.frame(token=character(), weight=numeric(), msg_matched=numeric(), spam_matched=numeric(), stringsAsFactors=FALSE) 
-# Define the size of the neural network
-num_node = 100;
+# Define the size of the neural network nodes
+num_node = 1000;
 
 # Function to get tokens from a message
 gimmie_tokens_from_message <- function(fileName) {
