@@ -11,5 +11,5 @@ R was used to implement this project.
 All the data you can find was extracted in [https://spamassassin.apache.org/publiccorpus/](https://spamassassin.apache.org/publiccorpus/).   
 
 ##Improvements
-- Improve the text manage used to extract words from an email. There are some words belonging to email format whose don't have to be considered as frequente word.
+- Improve the text manage used to extract words from an email. There are some words belonging to email format which don't have to be considered as frequente word.
 - Implement an effective code for continous learning. Our approach can reach any improvement in the final result.  
