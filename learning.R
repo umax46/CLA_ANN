@@ -16,7 +16,7 @@ learning <- function() {
   # Combine two data frame
   combine_input_layers <- rbind(innate_input_layers, adaptive_input_layers);  
   # Order new data frame by weight
-  combine_input_layers <- combine_input_layers[order(combine_input_layers$weight, decreasing = TRUE),]; 
+  combine_input_layers <- combine_input_layers[order(as.numeric(combine_input_layers$spam_matched), decreasing = TRUE),]; 
   # Select top num_node values of new data frame
   new_input_layers <- combine_input_layers[1:num_node,];
   new_input_layers <- na.omit(new_input_layers);
