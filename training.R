@@ -24,13 +24,13 @@ training <- function(nodes, innate_input_layers) {
   num_node <- nodes;
   
   # Set files from the training spam set
-  training_set_directory <-"./training_spam_set";
-  spam<-list.files(path = training_set_directory);
+  training_spam_set_directory <-"./training_spam_set";
+  spam<-list.files(path = training_spam_set_directory);
   
   # Algorithm for spam training
   spam_increment = 1;
   for (i in 1:length(spam)) {
-    fileName <- paste(training_set_directory, spam[i], sep="/");
+    fileName <- paste(training_spam_set_directory, spam[i], sep="/");
     mail_tokens <- gimmie_tokens_from_message(fileName);
     mail_tokens <- mail_tokens [! mail_tokens %in% ""] #to evict "" in mail_tokens
     for (t in mail_tokens) {
@@ -53,12 +53,12 @@ training <- function(nodes, innate_input_layers) {
   }
   
   # Set files from the training ham set
-  training_set_directory <-"./training_ham_set";
-  ham<-list.files(path = training_set_directory);
+  training_ham_set_directory <-"./training_ham_set";
+  ham<-list.files(path = training_ham_set_directory);
   
   # Algorithm for ham training
   for (i in 1:length(ham)) {
-    fileName <- paste(training_set_directory, ham[i], sep="/");
+    fileName <- paste(training_ham_set_directory, ham[i], sep="/");
     mail_tokens <- gimmie_tokens_from_message(fileName);
     mail_tokens <- mail_tokens [! mail_tokens %in% ""] #to evict "" in mail_tokens
     for (t in mail_tokens) {
@@ -73,6 +73,7 @@ training <- function(nodes, innate_input_layers) {
       }
     }
   }
+  # Delete those entries which spam_matched and msg_matched is equal to 1
   innate_input_layers <- delete_insignificant_tokens(innate_input_layers, 1); 
   return(innate_input_layers);
 }
